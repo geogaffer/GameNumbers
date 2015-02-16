@@ -1,3 +1,18 @@
+PLFFpointsbyminutes <- function() {
+    
+    require(ggplot2)
+    
+    if (!exists("playerList")) {
+        playerList <- read.csv("playerList.csv")
+    }
+    
+    p <- ggplot(data=playerList, aes(y=totalPoints, x=minutes, colour=position))
+    #p <- p + facet_grid(position ~ .)
+    p <- p + geom_point()
+    #p <- p + geom_smooth()
+    p
+}
+
 bySeason <- function() {
     
     require(ggplot2)
