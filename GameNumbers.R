@@ -1,3 +1,45 @@
+pointsByWeek <- function(team, player) {
+    
+    for (j in 1:length(team)) {
+        playerTable <- read.csv(paste("./data raw/", player[j], ".csv", sep=""))
+        #print(playerTable$us, playerTable$them)
+        
+        ptsWeek <- vector(mode="integer", length=length(playerTable$us))
+        ptsTotal <- vector(mode="integer", length=length(playerTable$us))
+        
+        for (i in 1:length(playerTable$us)) {
+            #print(paste(i, "; ", playerTable$us[i]))
+            if(playerTable$us[i]>playerTable$them[i]) {ptsWeek[i] <- 3} else 
+                if (playerTable$us[i]==playerTable$them[i]) {ptsWeek[i] <- 1} else 
+                {ptsWeek[i] <- 0}
+        }
+        
+        ptsTotal[1] <- ptsWeek[1]
+        
+        for (i in 2:length(playerTable$us)) {
+            ptsTotal[i] <- ptsTotal[i-1] + ptsWeek[i]
+        }
+        
+        if (j==1) {
+            weeks <- as.data.frame(ptsWeek)
+            totals <- as.data.frame(ptsTotal)
+        } else {
+            weeks <- cbind(weeks, ptsWeek)
+            totals <-cbind(totals, ptsTotal)
+        }
+    }
+    
+    names(weeks) <- team
+    names(totals) <- team
+    
+    write.csv(weeks, "./Weekly Points.csv")
+    write.csv(totals, "./Total Points.csv")
+
+    print(ptsWeek)
+    print(ptsTotal)
+    
+}
+
 PLFFpointsbyminutes <- function() {
     
     require(ggplot2)

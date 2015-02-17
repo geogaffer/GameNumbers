@@ -56,7 +56,11 @@ download.playerDB <- function(playerRange = seq(1, 15)) {
     
     library(jsonlite)
     
+    if (!file.exists("./data raw")) { dir.create("./data raw") }
+    if (!file.exists("./photos")) { dir.create("./photos")}
+    
     baseURL <- "http://fantasy.premierleague.com/web/api/elements/"
+    photoURL <- "http://cdn.ismfg.net/static/plfpl/img/shirts/photos/"
     playerID <- vector(mode="integer", length=length(playerRange))
     photo <- vector(mode="character", length=length(playerRange))
     lastName <- vector(mode="character", length=length(playerRange))
@@ -66,6 +70,19 @@ download.playerDB <- function(playerRange = seq(1, 15)) {
     totalPoints <- vector(mode="integer", length=length(playerRange))
     cost <- vector(mode="integer", length=length(playerRange))
     minutes <- vector(mode="integer", length=length(playerRange))
+    selectbyteam <- vector(mode="character", length=length(playerRange))
+    status <- vector(mode="character", length=length(playerRange))
+    cost_chg_start <- vector(mode="integer", length=length(playerRange))
+    cost_chg_event <- vector(mode="integer", length=length(playerRange))
+    cost_chg_start_fall <- vector(mode="integer", length=length(playerRange))
+    cost_chg_event_fall <- vector(mode="integer", length=length(playerRange))
+    dreamteam <- vector(mode="integer", length=length(playerRange))
+    trans_out <- vector(mode="integer", length=length(playerRange))
+    trans_in <- vector(mode="integer", length=length(playerRange))
+    trans_in_event <- vector(mode="integer", length=length(playerRange))
+    trans_out_event <- vector(mode="integer", length=length(playerRange))
+    play_this <- vector(mode="integer", length=length(playerRange))
+    play_next <- vector(mode="integer", length=length(playerRange))
     
     i <- 0
     for (playerNum in playerRange) {
@@ -84,7 +101,31 @@ download.playerDB <- function(playerRange = seq(1, 15)) {
             totalPoints[i] <<- total_points
             cost[i] <<- now_cost
             minutes[i] <<- minutes
+            selectbyteam[i] <<- selected_by_percent
+            status[i] <<- status
+            cost_chg_start[i] <<- cost_change_start
+            cost_chg_event[i] <<- cost_change_event
+            cost_chg_start_fall[i] <<- cost_change_start_fall
+            cost_chg_event_fall[i] <<- cost_change_event_fall
+            dreamteam[i] <<- dreamteam_count
+            trans_out[i] <<- transfers_out
+            trans_in[i] <<- transfers_in
+            trans_out_event[i] <<- transfers_out_event
+            trans_in_event[i] <<- transfers_in_event
+            if (length(chance_of_playing_this_round)>0) {
+                play_this[i] <<- chance_of_playing_this_round
+            }
+            if (length(chance_of_playing_next_round)>0) {
+                play_next[i] <<- chance_of_playing_next_round
+            }
         })
+        
+        localPlayerPhoto <- paste("./photos/", photo[i], sep="")
+        if (!file.exists(localPlayerPhoto)) {
+            urlPlayerPhoto <- paste(photoURL, photo[i], sep="")
+            download.file(url=urlPlayerPhoto, destfile=localPlayerPhoto, 
+                          method="curl", quiet=TRUE)
+        }
         
         history.all <- jsonData$fixture_history$all
         history.all <- as.data.frame(history.all, stringsAsFactors=FALSE)
@@ -122,9 +163,15 @@ download.playerDB <- function(playerRange = seq(1, 15)) {
     }
     
     playerList <- cbind(playerID, lastName, firstName, photo, position, team,
-                        totalPoints, cost, minutes)
+                        totalPoints, cost, minutes, status, cost_chg_start,
+                        cost_chg_event, cost_chg_start_fall, cost_chg_event_fall,
+                        dreamteam, trans_out, trans_in, trans_out_event, 
+                        trans_in_event, play_this, play_next)
     names(playerList) <- c("playerID", "lastName", "firstName", "photo", "position", 
-                           "team", "totalPoints", "cost", "minutes")
+                           "team", "totalPoints", "cost", "minutes", "status", 
+                           "costChgStart", "costChgEvent", "costStartFall", "costEventFall",
+                           "dreamteam", "transOut", "transIn", "transEventOut",
+                           "transEventIn", "playThis", "playNext")
     
     playerList
 }
