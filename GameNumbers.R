@@ -1,3 +1,87 @@
+plotCSsPerWeek <- function(goalsFile) {
+    
+    goalsEach <- read.csv(file=goalsFile)
+    
+    goalsPerWeek <- vector(mode="integer", length=length(goalsEach[,1]))
+    cleanSheets <- vector(mode="integer", length=length(goalsEach[,1]))
+    countCS <- vector(mode="integer", length=length(goalsEach[,1]))
+    
+    for (i in 1:length(goalsEach[,1])) {
+        goalsPerWeek[i] <- sum(goalsEach[i,])
+        countCS[i] <- sum(goalsEach[i,] == cleanSheets)
+    }
+    #plot(goalsPerWeek, type="b")
+    plot(countCS, type="b", col="red")
+}
+
+plotGoalsPerWeek <- function(goalsFile) {
+    
+    goalsEach <- read.csv(file=goalsFile)
+    
+    goalsPerWeek <- vector(mode="integer", length=length(goalsEach[,1]))
+    cleanSheets <- vector(mode="integer", length=length(goalsEach[,1]))
+    countCS <- vector(mode="integer", length=length(goalsEach[,1]))
+    
+    for (i in 1:length(goalsEach[,1])) {
+        goalsPerWeek[i] <- sum(goalsEach[i,])
+        countCS[i] <- sum(goalsEach[i,] == cleanSheets)
+    }
+    plot(goalsPerWeek, type="b", col="blue")
+}
+
+goalsByWeek <- function(team, player) {
+    
+    for (j in 1:length(team)) {
+        playerTable <- read.csv(paste("./data raw/", player[j], ".csv", sep=""))
+        #print(playerTable$us, playerTable$them)
+        
+        forWeek <- vector(mode="integer", length=length(playerTable$us))
+        againstWeek <- vector(mode="integer", length=length(playerTable$us))
+        forTotal <- vector(mode="integer", length=length(playerTable$us))
+        againstTotal <- vector(mode="integer", length=length(playerTable$us))
+        
+        for (i in 1:length(playerTable$us)) {
+            #print(paste(i, "; ", playerTable$us[i]))
+            forWeek[i] <- playerTable$us[i]
+            againstWeek[i] <- playerTable$them[i]
+        }
+        
+        forTotal[1] <- forWeek[1]
+        againstTotal[1] <- againstWeek[1]
+        
+        for (i in 2:length(playerTable$us)) {
+            forTotal[i] <- forTotal[i-1] + forWeek[i]
+            againstTotal[i] <- againstTotal[i-1] + againstWeek[i]
+        }
+        
+        if (j==1) {
+            fws <- as.data.frame(forWeek)
+            fts <- as.data.frame(forTotal)
+            aws <- as.data.frame(againstWeek)
+            ats <- as.data.frame(againstTotal)
+        } else {
+            fws <- cbind(fws, forWeek)
+            fts <- cbind(fts, forTotal)
+            aws <- cbind(aws, againstWeek)
+            ats <- cbind(ats, againstTotal)
+        }
+    }
+    
+    names(fws) <- team
+    names(fts) <- team
+    names(aws) <- team
+    names(ats) <- team
+    
+    write.csv(fws, "./Weekly For.csv")
+    write.csv(fts, "./Total For.csv")
+    write.csv(aws, "./Weekly Against.csv")
+    write.csv(ats, "./Total Against.csv")
+    
+    
+    #print(ptsWeek)
+    #print(ptsTotal)
+}
+
 pointsByWeek <- function(team, player) {
     
     for (j in 1:length(team)) {
@@ -35,8 +119,8 @@ pointsByWeek <- function(team, player) {
     write.csv(weeks, "./Weekly Points.csv")
     write.csv(totals, "./Total Points.csv")
 
-    print(ptsWeek)
-    print(ptsTotal)
+    #print(ptsWeek)
+    #print(ptsTotal)
     
 }
 
